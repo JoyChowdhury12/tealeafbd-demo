@@ -95,3 +95,10 @@ Live demo probabilities are never taken from these numbers; they always come fro
 
 ## Plumbing test (no PyTorch needed)
 `python tests/test_adapter.py` checks the adapter against a tiny stub of `predict.py` (models load once, class order, probabilities sum to 1). The stub is not a model and is only for testing. Set `REAL_PACKAGE=<your TeaLeafBD_Deployment>` to also run your real `xai/occlusion.py` through the glue code.
+
+## 13. Relation to the paper and limitations
+This demo accompanies the manuscript on the six-model ensemble. Two differences from the paper's analysis:
+- **Probabilities are not calibrated.** The demo shows the raw weighted soft-voting probabilities. The paper's temperature scaling (T = 0.596) and its validation-chosen review thresholds are not applied here.
+- **Grad-CAM is an ensemble view.** The demo combines the Grad-CAM maps of all six networks with the frozen ensemble weights. The Grad-CAM figures in the paper use TeaDGCNet-DenseNet121 only.
+
+The models were trained and tested on photographs of single detached leaves on a white background. Results on leaves in the field, or under other lighting, were not tested. Highlighted regions in explanations show what influenced the model and are not guaranteed disease locations. This is a research demonstration, not a diagnostic tool, and uncertain cases should be checked by an expert.
