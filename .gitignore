@@ -1,0 +1,6 @@
+node_modules/
+dist/
+__pycache__/
+.venv/
+backend/.env
+frontend/public/examples/*.jpg

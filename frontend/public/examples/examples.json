@@ -1,0 +1,30 @@
+[
+  {
+    "file": "0_0.jpg",
+    "label": "Tea algal leaf spot"
+  },
+  {
+    "file": "1_0.jpg",
+    "label": "Brown Blight"
+  },
+  {
+    "file": "2_0.jpg",
+    "label": "Gray Blight"
+  },
+  {
+    "file": "3_0.jpg",
+    "label": "Helopeltis"
+  },
+  {
+    "file": "4_0.jpg",
+    "label": "Red spider"
+  },
+  {
+    "file": "5_0.jpg",
+    "label": "Green mirid bug"
+  },
+  {
+    "file": "6_0.jpg",
+    "label": "Healthy leaf"
+  }
+]

@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html { scroll-behavior: smooth; }
+body { @apply bg-white text-slate-800 antialiased dark:bg-ink-900 dark:text-slate-200; font-family: 'Inter', system-ui, sans-serif; }
+section[id] { scroll-margin-top: 5rem; }
+
+@layer components {
+  .card { @apply rounded-3xl border border-slate-200/80 bg-white shadow-card dark:border-white/10 dark:bg-ink-800; }
+  .btn-primary { @apply inline-flex items-center justify-center gap-2 rounded-xl bg-leaf-600 px-5 py-3 font-semibold text-white shadow-sm transition hover:bg-leaf-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-leaf-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 dark:disabled:bg-white/10 dark:disabled:text-slate-500; }
+  .btn-ghost { @apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-800 transition hover:border-leaf-300 hover:bg-leaf-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-leaf-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-100 dark:hover:bg-white/10; }
+  .section-title { @apply text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl dark:text-white; }
+  .section-sub { @apply mt-3 max-w-2xl text-lg text-slate-600 dark:text-slate-400; }
+}
