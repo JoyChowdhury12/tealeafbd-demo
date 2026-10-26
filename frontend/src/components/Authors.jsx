@@ -19,9 +19,11 @@ export default function Authors() {
             </div>
           ))}
         </div>
-        <p className="mt-6 text-slate-600 dark:text-slate-400">
-          <span className="font-semibold">{SUPERVISOR.label}:</span> {SUPERVISOR.name}
-        </p>
+        {SUPERVISOR.name && (
+          <p className="mt-6 text-slate-600 dark:text-slate-400">
+            <span className="font-semibold">{SUPERVISOR.label}:</span> {SUPERVISOR.name}
+          </p>
+        )}
       </div>
     </section>
   )

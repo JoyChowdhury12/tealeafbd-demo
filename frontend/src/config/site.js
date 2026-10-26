@@ -51,12 +51,13 @@ export const PIPELINE = [
   'Final Disease Prediction',
 ]
 
-// Placeholders: edit freely. No affiliations/emails/IDs are invented.
+// Edit freely. No affiliations/emails/IDs are invented.
 export const AUTHORS = [
   { name: 'Joy Roy Chowdhury', role: 'Researcher', affiliation: 'Department of Software Engineering, Daffodil International University' },
-  { name: 'Author Name', role: 'Researcher', affiliation: 'Department of Software Engineering, Daffodil International University' },
+  { name: 'Izaz Ahmmed Tuhin', role: 'Lecturer', affiliation: 'Department of Software Engineering, Daffodil International University' },
 ]
-export const SUPERVISOR = { label: 'Supervisor', name: '[Supervisor Name]' }
+// Leave `name` empty to hide the supervisor line.
+export const SUPERVISOR = { label: 'Supervisor', name: '' }
 
 export const NAV = [
   { id: 'home', label: 'Home' },
