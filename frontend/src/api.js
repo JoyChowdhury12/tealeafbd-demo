@@ -28,13 +28,6 @@ export function predict(file) {
   return request('/predict', { method: 'POST', body: form })
 }
 
-export function explain(method, file, classIndex) {
-  const form = new FormData()
-  form.append('file', file)
-  if (classIndex !== undefined && classIndex !== null) form.append('class_index', String(classIndex))
-  return request(`/explain/${method}`, { method: 'POST', body: form })
-}
-
 export function health() {
   return request('/health')
 }

@@ -9,8 +9,8 @@ import os
 from pathlib import Path
 
 # Local-development fallback ONLY. Set MODEL_ROOT in the environment (or in
-# backend/.env) to the folder that contains predict.py, models/, ensemble/,
-# classes.json and xai/.
+# backend/.env) to the folder that contains predict.py, models/, ensemble/
+# and classes.json.
 _LOCAL_DEV_FALLBACK = str(Path.home() / "Desktop" / "tea leaf results" / "tea_leaf_centralized_research" / "TeaLeafBD_Deployment")
 
 
@@ -64,5 +64,3 @@ MODEL_NAMES = [
     "TeaDGCNet-EfficientNetB0",
     "TeaDGCNet-ResNet50",
 ]
-
-XAI_METHODS = ("gradcam", "lime", "occlusion", "shap")

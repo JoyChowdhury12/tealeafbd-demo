@@ -71,7 +71,7 @@ export default function Demo({ notify }) {
           onClear={clear}
           onSubmit={submit}
         />
-        <PredictionResult result={result} loading={loading} file={file} notify={notify} />
+        <PredictionResult result={result} loading={loading} />
       </div>
 
       <ExampleGallery onPick={choose} notify={notify} disabled={loading} />

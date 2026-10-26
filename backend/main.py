@@ -12,25 +12,17 @@ import logging
 from contextlib import asynccontextmanager
 from typing import Optional
 
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.concurrency import run_in_threadpool
 from PIL import Image, UnidentifiedImageError
 
 import config
-import xai_service
 from inference import InferenceError, ModelNotReady, service
-from schemas import ExplanationResponse, HealthResponse, PredictionResponse
+from schemas import HealthResponse, PredictionResponse
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("tealeafbd.api")
-
-XAI_NOTES = {
-    "gradcam": "Highlighted regions contributed strongly to the model's prediction. They are not guaranteed disease locations.",
-    "lime": "LIME perturbs superpixels of this image; outlined regions pushed the prediction toward the shown class.",
-    "occlusion": "Regions whose masking changes the target prediction probability more strongly are more influential for that prediction.",
-    "shap": "SHAP values attribute the prediction to image regions. Positive attributions support the shown class.",
-}
 
 
 @asynccontextmanager
@@ -106,23 +98,3 @@ async def predict(file: UploadFile = File(None)) -> PredictionResponse:
     except Exception as exc:
         raise _friendly(exc)
     return PredictionResponse(**result)
-
-
-@app.post("/explain/{method}", response_model=ExplanationResponse)
-async def explain(
-    method: str,
-    file: UploadFile = File(None),
-    class_index: Optional[int] = Form(None),
-) -> ExplanationResponse:
-    """Run ONE explanation method on demand (Grad-CAM, LIME, Occlusion or SHAP)."""
-    if method not in xai_service.available_methods():
-        raise HTTPException(404, "Unknown explanation method.")
-    image = await _read_image(file)
-    try:
-        result = await run_in_threadpool(xai_service.explain, method, image, class_index)
-    except HTTPException:
-        raise
-    except Exception as exc:
-        raise _friendly(exc)
-    result["note"] = XAI_NOTES[method]
-    return ExplanationResponse(**result)

@@ -9,8 +9,7 @@ export const SITE = {
   title: 'Tea Leaf Disease Classification Using a 6-Model Weighted Ensemble',
   tagline: 'AI-powered tea leaf disease classification',
   dataset: 'TeaLeafBD v4',
-  // TODO: replace with the real URLs
-  githubUrl: 'https://github.com/',
+  githubUrl: 'https://github.com/JoyChowdhury12/tealeafbd-demo',
   paperUrl: '#',
 }
 

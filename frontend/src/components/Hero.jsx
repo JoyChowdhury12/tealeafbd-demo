@@ -2,18 +2,17 @@ import { useEffect, useState } from 'react'
 import { ArrowRight, Leaf } from 'lucide-react'
 import { CLASSES } from '../config/site.js'
 
-// Hero carousel. Preferred: REAL Grad-CAM overlays of train/validation images,
-// produced by scripts/make_hero_gradcam.py (public/examples/hero.json).
-// Fallback: the plain example images (examples.json). Otherwise an illustrated leaf.
+// Hero carousel of plain example images (public/examples/examples.json, built by
+// scripts/make_examples.py). If none exist, an illustrated leaf is shown.
 export default function Hero() {
   const [items, setItems] = useState([])
   const [i, setI] = useState(0)
 
   useEffect(() => {
-    const load = (url) => fetch(url).then((r) => (r.ok ? r.json() : [])).catch(() => [])
-    load('/examples/hero.json').then((hero) =>
-      Array.isArray(hero) && hero.length ? setItems(hero) : load('/examples/examples.json').then((l) => setItems(Array.isArray(l) ? l : [])),
-    )
+    fetch('/examples/examples.json')
+      .then((r) => (r.ok ? r.json() : []))
+      .catch(() => [])
+      .then((l) => setItems(Array.isArray(l) ? l : []))
   }, [])
 
   useEffect(() => {
@@ -35,7 +34,7 @@ export default function Hero() {
             Disease <span className="text-leaf-600">Classification</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-400">
-            An interpretable deep learning framework for automated classification of tea leaf diseases using a
+            A deep learning framework for automated classification of tea leaf diseases using a
             six-model weighted ensemble.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
@@ -63,7 +62,7 @@ export default function Hero() {
               {items.length > 0 && (
                 <>
                   <span className="absolute left-4 top-4 max-w-[85%] rounded-full bg-white/90 px-3 py-1 text-sm font-semibold text-slate-800 shadow dark:bg-ink-800/90 dark:text-white">
-                    {items[i].predicted ? `Grad-CAM Overlay (class: ${items[i].predicted})` : items[i].label}
+                    {items[i].label}
                   </span>
                   <div className="absolute bottom-3 right-4 flex gap-1.5">
                     {items.map((it, k) => (

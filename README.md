@@ -1,12 +1,17 @@
 # TeaLeafBD: Tea Leaf Disease Classification Using a 6-Model Weighted Ensemble
 
 A research demo website (React + Vite + Tailwind) with a FastAPI backend that runs the **existing, frozen**
-TeaLeafBD deployment package (`predict.py`, six `.pth` models, `xai/*.py`). Nothing is retrained or re-implemented.
+TeaLeafBD deployment package (`predict.py` and six `.pth` models). Nothing is retrained or re-implemented.
+
+```bash
+git clone https://github.com/JoyChowdhury12/tealeafbd-demo.git
+```
 
 ## 1. Overview
 - Dataset: TeaLeafBD v4, 7 classes
 - Model: 6-model weighted soft-voting ensemble (DenseNet121, EfficientNet-B0, ResNet50, TeaDGCNet-DenseNet121, TeaDGCNet-EfficientNetB0, TeaDGCNet-ResNet50)
-- Live demo: upload a leaf image, get the ensemble's class, probability, all class probabilities, per-model votes, and live explanations (Grad-CAM by default; LIME / Occlusion / SHAP on request).
+- Live demo: upload a leaf image and get the ensemble's class, its probability, all class probabilities and the per-model votes.
+- The explanation methods used in the study (Grad-CAM, LIME, occlusion, SHAP) are not part of this web demo. They are in the paper and in the code package on Zenodo (section 13).
 
 ## 2. Architecture
 ```
@@ -14,14 +19,13 @@ Browser (React)  --/api/predict-->  FastAPI (main.py)
                                       |  inference.py (adapter, models loaded ONCE at start-up)
                                       v
                        <MODEL_ROOT>/predict.py  -> preprocessing -> 6 models -> weighted soft voting
-Browser (React)  --/api/explain/{method}-->  xai_service.py -> <MODEL_ROOT>/xai/{gradcam,lime_explainer,occlusion,shap_explainer}.py
 ```
-Uploads are decoded in memory; any temporary file needed by `predict.py` is deleted right after use. No local paths or checkpoint paths are returned by the API.
+Uploads are decoded in memory. No local paths or checkpoint paths are returned by the API.
 
 ## 3. Folder structure
 ```
 TeaLeafBD_Web/
-├── backend/   main.py  config.py  schemas.py  inference.py  xai_service.py  requirements.txt  .env.example
+├── backend/   main.py  config.py  schemas.py  inference.py  requirements.txt  .env.example
 ├── frontend/  src/{App.jsx, api.js, config/site.js, components/*}  public/examples/  package.json ...
 ├── scripts/   make_examples.py      # builds the "Try an Example" gallery (train/val images only)
 ├── tests/     test_adapter.py + stub_deployment/   # plumbing test only; the stub is NOT a model
@@ -33,27 +37,24 @@ TeaLeafBD_Web/
 cd backend
 python -m venv .venv && .venv\Scripts\activate        # Windows (Linux/macOS: source .venv/bin/activate)
 pip install -r requirements.txt
-pip install -r "<MODEL_ROOT>/requirements.txt"   # torch, torchvision, matplotlib, scikit-image, lime, shap ...
+pip install torch torchvision                    # or: pip install -r "<MODEL_ROOT>/requirements.txt"
 copy .env.example .env      # then edit MODEL_ROOT
 ```
 
 ## 5. Configure the model path
 Set `MODEL_ROOT` in `backend/.env` (or as an environment variable) to the folder that contains
-`predict.py`, `models/`, `ensemble/`, `classes.json` and `xai/`:
+`predict.py`, `models/`, `ensemble/` and `classes.json`:
 ```
 MODEL_ROOT=C:\path\to\TeaLeafBD_Deployment
 ```
-The `.pth` files are referenced in place, never copied. The fallback in `config.py` (Desktop/tea leaf results/tea_leaf_centralized_research/TeaLeafBD_Deployment) is for local development only; set MODEL_ROOT for any other location.
+The code package and the six `.pth` files are available from Zenodo (section 13). Unzip the code package, create a folder
+named `models` next to `predict.py`, and put the six `.pth` files in it without renaming them. The `.pth` files are
+referenced in place, never copied. The fallback in `config.py` (Desktop/tea leaf results/tea_leaf_centralized_research/TeaLeafBD_Deployment)
+is for local development only; set MODEL_ROOT for any other location.
 
-The backend uses your package's real API: `predict.load_ensemble()` (called once at start-up),
-`predict.predict_image(image, models_dict)`, `CLASS_NAMES`, and the `xai/` functions `generate_gradcam`, `overlay_gradcam`,
-`generate_occlusion`, `explain_lime`, `explain_shap`. Open `http://127.0.0.1:8000/health` after start-up:
+The backend uses the package's real API: `predict.load_ensemble()` (called once at start-up),
+`predict.predict_image(image, models_dict)` and `CLASS_NAMES`. Open `http://127.0.0.1:8000/health` after start-up:
 `models_loaded: true` means all six models loaded.
-
-**How explanations are produced.** All use the 224x224 resized image (the first step of your own preprocessing).
-Grad-CAM is computed for each of the six networks with your `gradcam.py` and combined with the frozen ensemble weights,
-targeting the ensemble's predicted class. Occlusion, LIME and SHAP call the full ensemble through `predict.py`.
-Occlusion (196 ensemble passes), LIME (1000 samples) and SHAP are slow on CPU, so they only run when selected.
 
 ## 6. Start FastAPI
 ```bash
@@ -61,7 +62,7 @@ cd backend
 uvicorn main:app --reload --port 8000
 ```
 (Models load once at start-up. With `--reload` they reload when code changes; for a stable demo drop `--reload`.)
-Endpoints: `GET /health`, `POST /predict` (multipart field `file`), `POST /explain/{gradcam|lime|occlusion|shap}` (field `file`, optional `class_index`).
+Endpoints: `GET /health` and `POST /predict` (multipart field `file`).
 
 ## 7. Start React
 ```bash
@@ -69,7 +70,7 @@ cd frontend
 npm install
 npm run dev          # http://localhost:5173  (proxies /api -> http://127.0.0.1:8000)
 ```
-Different backend address: set `VITE_BACKEND_URL` (dev proxy) or `VITE_API_URL` (build) .
+Different backend address: set `VITE_BACKEND_URL` (dev proxy) or `VITE_API_URL` (build).
 
 ## 8. Example gallery
 ```bash
@@ -78,7 +79,7 @@ python scripts/make_examples.py --manifest "<train_manifest.csv>" "<val_manifest
 Rows whose `split` is `test` are ignored. Thumbnails go to `frontend/public/examples/`. Clicking an example only loads the image; the prediction is computed by the backend when you press Submit.
 
 ## 9. How prediction works
-Upload → FastAPI validates (JPG/JPEG/PNG/WEBP, ≤ `MAX_UPLOAD_MB`, default 10 MB) → `predict.py` preprocessing → six frozen models → weighted soft voting → class probabilities. The UI sorts the bars high→low for display while the API keeps the original class order. Grad-CAM runs automatically after a prediction; LIME, Occlusion and SHAP run only when the user selects them, one at a time.
+Upload → FastAPI validates (JPG/JPEG/PNG/WEBP, ≤ `MAX_UPLOAD_MB`, default 10 MB) → `predict.py` preprocessing → six frozen models → weighted soft voting → class probabilities. The UI sorts the bars high→low for display while the API keeps the original class order.
 
 ## 10. Classes (index order)
 0 Tea algal leaf spot · 1 Brown Blight · 2 Gray Blight · 3 Helopeltis · 4 Red spider · 5 Green mirid bug · 6 Healthy leaf
@@ -93,12 +94,20 @@ Live demo probabilities are never taken from these numbers; they always come fro
 - Frontend: `npm run build` → serve `frontend/dist/` with any static host; set `VITE_API_URL=https://api.your-site` at build time (or route `/api` to the backend).
 - Edit authors, GitHub and paper links in `frontend/src/config/site.js`.
 
-## Plumbing test (no PyTorch needed)
-`python tests/test_adapter.py` checks the adapter against a tiny stub of `predict.py` (models load once, class order, probabilities sum to 1). The stub is not a model and is only for testing. Set `REAL_PACKAGE=<your TeaLeafBD_Deployment>` to also run your real `xai/occlusion.py` through the glue code.
+## 13. Trained models, code and data split
+The six trained checkpoints, the inference code (including the explanation modules used in the study) and the train/validation/test
+split manifest are archived on Zenodo: https://doi.org/10.5281/zenodo.23303246
 
-## 13. Relation to the paper and limitations
-This demo accompanies the manuscript on the six-model ensemble. Two differences from the paper's analysis:
+The images are not included. They come from the teaLeafBD dataset: https://doi.org/10.17632/744vznw5k2.4
+
+## 14. Relation to the paper and limitations
+This demo accompanies the manuscript on the six-model ensemble. One difference from the paper's analysis:
 - **Probabilities are not calibrated.** The demo shows the raw weighted soft-voting probabilities. The paper's temperature scaling (T = 0.596) and its validation-chosen review thresholds are not applied here.
-- **Grad-CAM is an ensemble view.** The demo combines the Grad-CAM maps of all six networks with the frozen ensemble weights. The Grad-CAM figures in the paper use TeaDGCNet-DenseNet121 only.
 
-The models were trained and tested on photographs of single detached leaves on a white background. Results on leaves in the field, or under other lighting, were not tested. Highlighted regions in explanations show what influenced the model and are not guaranteed disease locations. This is a research demonstration, not a diagnostic tool, and uncertain cases should be checked by an expert.
+The models were trained and tested on photographs of single detached leaves on a white background. Results on leaves in the field, or under other lighting, were not tested. This is a research demonstration, not a diagnostic tool, and uncertain cases should be checked by an expert.
+
+## Plumbing test (no PyTorch needed)
+`python tests/test_adapter.py` checks the adapter against a tiny stub of `predict.py` (models load once, class order, probabilities sum to 1). The stub is not a model and is only for testing.
+
+## License
+MIT. See `LICENSE`.

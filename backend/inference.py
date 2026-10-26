@@ -20,7 +20,6 @@ import sys
 import threading
 from typing import Any, Dict, List, Optional
 
-import numpy as np
 from PIL import Image
 
 import config
@@ -37,7 +36,7 @@ class ModelNotReady(InferenceError):
 
 
 def as_file(image: Image.Image) -> io.BytesIO:
-    """Lossless in-memory file for `Image.open(...)` inside predict.py / xai modules."""
+    """Lossless in-memory file for `Image.open(...)` inside predict.py."""
     buf = io.BytesIO()
     image.convert("RGB").save(buf, format="PNG", compress_level=1)
     buf.seek(0)
@@ -101,23 +100,6 @@ class EnsembleService:
             "probabilities": probs,
             "individual_predictions": indiv,
         }
-
-    def probabilities(self, image: Image.Image) -> np.ndarray:
-        """Ensemble probability vector (class order) for one PIL image.
-
-        Used by the LIME / Occlusion / SHAP modules as their `predict_function`.
-        Callers hold `self.lock`.
-        """
-        raw = self._run(image)
-        return np.array([raw["probabilities"][c] for c in self.classes], dtype=np.float64)
-
-    def probabilities_batch(self, arrays) -> np.ndarray:
-        """Same, for a batch of HxWx3 arrays (LIME's `classifier_fn` format)."""
-        out = []
-        for arr in arrays:
-            arr = np.clip(np.asarray(arr), 0, 255).astype(np.uint8)
-            out.append(self.probabilities(Image.fromarray(arr).convert("RGB")))
-        return np.asarray(out)
 
 
 service = EnsembleService()

@@ -1,11 +1,10 @@
 import { Eye, Loader2 } from 'lucide-react'
 import ProbabilityBars from './ProbabilityBars.jsx'
 import ModelPredictions from './ModelPredictions.jsx'
-import Explainability from './Explainability.jsx'
 
 const pct = (p) => `${(p * 100).toFixed(2)}%`
 
-export default function PredictionResult({ result, loading, file, notify }) {
+export default function PredictionResult({ result, loading }) {
   return (
     <div className="card p-6 sm:p-8">
       <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Classification Results</h3>
@@ -48,7 +47,6 @@ export default function PredictionResult({ result, loading, file, notify }) {
 
           <ProbabilityBars probabilities={result.probabilities} predicted={result.predicted_class} />
           <ModelPredictions predictions={result.individual_predictions} final={result.predicted_class} />
-          <Explainability file={file} result={result} notify={notify} />
         </div>
       )}
     </div>
